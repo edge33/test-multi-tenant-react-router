@@ -1,8 +1,6 @@
-# Welcome to React Router!
+# Multi-tenant-test
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+A modern, production-ready React Router application with multi-tenant subdomain routing.
 
 ## Features
 
@@ -11,7 +9,7 @@ A modern, production-ready template for building full-stack React applications u
 - 📦 Asset bundling and optimization
 - 🔄 Data loading and mutations
 - 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
+- 🌐 **Multi-tenant subdomain routing**
 - 📖 [React Router docs](https://reactrouter.com/)
 
 ## Getting Started
@@ -33,6 +31,83 @@ npm run dev
 ```
 
 Your application will be available at `http://localhost:5173`.
+
+## Subdomain Routing
+
+This application implements multi-tenant subdomain routing. Different subdomains can serve different content:
+
+### How it Works
+
+- **Root domain** (`yourapp.com` or `localhost:5173`): Serves the main landing page
+- **Subdomains** (`tenant1.yourapp.com`): Serve tenant-specific dashboards
+
+### Testing Subdomains Locally
+
+#### Option 1: Using localhost subdomains (Recommended for Development)
+
+Modern browsers support `*.localhost` subdomains without configuration:
+
+1. Start the dev server: `npm run dev`
+2. Access different subdomains:
+   - Main site: `http://localhost:5173`
+   - Tenant 1: `http://tenant1.localhost:5173`
+   - Tenant 2: `http://tenant2.localhost:5173`
+
+#### Option 2: Using /etc/hosts
+
+Add entries to your `/etc/hosts` file (requires sudo):
+
+```bash
+sudo nano /etc/hosts
+```
+
+Add these lines:
+
+```
+127.0.0.1  tenant1.localhost
+127.0.0.1  tenant2.localhost
+127.0.0.1  demo.localhost
+```
+
+Then access:
+
+- `http://tenant1.localhost:5173`
+- `http://tenant2.localhost:5173`
+
+#### Option 3: Using ngrok or similar tunneling tools
+
+For testing with real subdomains:
+
+```bash
+ngrok http 5173
+# Then configure wildcard DNS to point *.your-ngrok-domain.ngrok.io to your tunnel
+```
+
+### Routes
+
+#### Root Domain Routes
+
+- `/` - Landing page
+
+#### Subdomain Routes
+
+- `/` - Subdomain home page
+- `/dashboard` - Subdomain dashboard
+
+### Implementation Details
+
+The subdomain detection logic is in `app/utils/getSubdomain.ts` and:
+
+- Extracts subdomain from the `Host` header
+- Supports `*.localhost` for local development
+- Filters out `www` subdomain by default
+- Works in both development and production
+
+The routing logic in `app/layouts/layout.tsx`:
+
+- Detects subdomain in the loader
+- Redirects to appropriate routes based on subdomain presence
+- Passes subdomain context to child routes
 
 ## Building for Production
 
